@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Archivo de Expansiones</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral+SC:wght@500;700&family=Spectral:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: cronología vertical; cada año es una franja con su número grande pegado al lateral y una rejilla de colecciones */
+:root{
+  --bg:#f3f1ec; --surface:#fffdf8; --ink:#1d1a22; --muted:#6c6573; --line:#d9d3cb;
+  --accent:#8a5a1b; --mythic:#c4511c; --chip:#ebe5dc;
+  --display:"Spectral SC", Georgia, serif;
+  --body:"Spectral", Georgia, serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root{ --bg:#141217; --surface:#1d1a22; --ink:#ece6dc; --muted:#9a92a3; --line:#2f2a36;
+    --accent:#d6a35a; --mythic:#e8773f; --chip:#2a2530; color-scheme:dark; }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));}
+.wrap{max-width:1240px;margin:0 auto;padding-block:32px 64px}
+header h1{font-family:var(--display);font-weight:700;font-size:clamp(2rem,5vw,3.4rem);line-height:1.05;margin:0;text-wrap:balance;letter-spacing:.01em}
+header p{color:var(--muted);margin:.5rem 0 0;max-width:62ch}
+.bar{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+  padding-block:14px;margin-top:24px;border-bottom:1px solid var(--line)}
+.bar input[type=search]{flex:1 1 220px;min-width:0;font:inherit;padding:8px 12px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+.bar label{font-family:var(--mono);font-size:.78rem;color:var(--muted);display:flex;gap:6px;align-items:center;cursor:pointer}
+.years{display:flex;gap:4px;overflow-x:auto;flex-basis:100%;padding-bottom:2px;scrollbar-width:thin}
+.years a{font-family:var(--mono);font-size:.75rem;color:var(--muted);text-decoration:none;padding:3px 7px;border-radius:4px;white-space:nowrap}
+.years a:hover,.years a:focus-visible{background:var(--chip);color:var(--ink);outline:none}
+.status{font-family:var(--mono);font-size:.8rem;color:var(--muted);margin:16px 0}
+section.year{display:grid;grid-template-columns:120px 1fr;gap:24px;padding-block:32px;border-bottom:1px solid var(--line);scroll-margin-top:110px}
+.year h2{font-family:var(--display);font-size:2.6rem;margin:0;color:var(--accent);line-height:1;position:sticky;top:120px;align-self:start;font-variant-numeric:tabular-nums}
+.year h2 small{display:block;font-family:var(--mono);font-size:.72rem;color:var(--muted);margin-top:6px;letter-spacing:.04em}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px;min-width:0}
+.set{background:var(--surface);border:1px solid var(--line);border-radius:4px;overflow:hidden;display:flex;flex-direction:column;text-decoration:none;color:inherit;transition:transform .15s ease, border-color .15s}
+.set:hover,.set:focus-visible{transform:translateY(-2px);border-color:var(--accent);outline:none}
+.art{aspect-ratio:626/457;max-width:100%;background:var(--chip);position:relative;overflow:hidden}
+.art img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .4s}
+.art img.on{opacity:1}
+.art .sym{position:absolute;inset:0;display:grid;place-items:center}
+.art .sym img{width:38%;height:auto;opacity:.35;filter:var(--symf)}
+@media (prefers-color-scheme:dark){ :root{--symf:invert(1)} }
+.meta{padding:10px 12px 12px;display:flex;flex-direction:column;gap:4px}
+.meta h3{font-size:1rem;font-weight:600;margin:0;line-height:1.25}
+.row{display:flex;justify-content:space-between;gap:8px;font-family:var(--mono);font-size:.72rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.code{text-transform:uppercase;letter-spacing:.06em}
+.tag{display:inline-block;font-family:var(--mono);font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;padding:1px 6px;border-radius:3px;background:var(--chip);color:var(--muted);align-self:flex-start}
+.tag.soon{background:var(--mythic);color:#fff}
+@media (max-width:640px){
+  section.year{grid-template-columns:1fr;gap:12px}
+  .year h2{position:static}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+}
+@media (prefers-reduced-motion:reduce){ .set,.art img{transition:none} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Archivo de Expansiones</h1>
+    <p>Todas las colecciones de Magic: The Gathering, de la más reciente a la más antigua. Datos y arte en directo desde Scryfall; cada carta de portada es la de mayor rareza de su colección.</p>
+  </header>
+
+  <div class="bar">
+    <input type="search" id="q" placeholder="Buscar por nombre o código (MH3, Dominaria…)" aria-label="Buscar colección">
+    <label><input type="checkbox" id="all"> Incluir promos, tokens y digitales</label>
+    <nav class="years" id="years" aria-label="Saltar a año"></nav>
+  </div>
+
+  <div class="status" id="status">Cargando colecciones…</div>
+  <main id="list"></main>
+</div>
+
+<script>
+const MAIN_TYPES = new Set(["core","expansion","masters","draft_innovation","commander","funny","starter","box","from_the_vault","premium_deck","duel_deck","spellbook","arsenal","planechase","archenemy","masterpiece","eternal"]);
+const TYPE_ES = {core:"Básica",expansion:"Expansión",masters:"Masters",draft_innovation:"Draft especial",commander:"Commander",funny:"Humor",starter:"Inicio",box:"Caja",from_the_vault:"From the Vault",premium_deck:"Mazo premium",duel_deck:"Duel Deck",spellbook:"Spellbook",arsenal:"Arsenal",planechase:"Planechase",archenemy:"Archenemy",masterpiece:"Masterpiece",eternal:"Eternal",promo:"Promo",token:"Tokens",memorabilia:"Memorabilia",alchemy:"Alchemy",treasure_chest:"Digital",minigame:"Minijuego",vanguard:"Vanguard"};
+const today = new Date().toISOString().slice(0,10);
+let SETS = [];
+
+const $ = s => document.querySelector(s);
+const cache = {
+  get(k){ try{ return JSON.parse(localStorage.getItem("mtgart:"+k)); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem("mtgart:"+k, JSON.stringify(v)); }catch(e){} }
+};
+
+async function load(){
+  try{
+    const r = await fetch("https://api.scryfall.com/sets", {headers:{Accept:"application/json"}});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    const j = await r.json();
+    SETS = j.data.filter(s => s.released_at)
+      .sort((a,b) => b.released_at.localeCompare(a.released_at));
+    render();
+  }catch(e){
+    $("#status").textContent = "No se pudo conectar con Scryfall ("+e.message+"). Revisa tu conexión y recarga.";
+  }
+}
+
+function render(){
+  const q = $("#q").value.trim().toLowerCase();
+  const all = $("#all").checked;
+  const sets = SETS.filter(s => (all || (MAIN_TYPES.has(s.set_type) && !s.digital && !s.parent_set_code)) &&
+    (!q || s.name.toLowerCase().includes(q) || s.code.toLowerCase() === q));
+  const byYear = new Map();
+  for(const s of sets){ const y = s.released_at.slice(0,4); if(!byYear.has(y)) byYear.set(y,[]); byYear.get(y).push(s); }
+
+  $("#status").textContent = sets.length + " colecciones · " + byYear.size + " años";
+  $("#years").innerHTML = [...byYear.keys()].map(y => `<a href="#y${y}">${y}</a>`).join("");
+  const list = $("#list"); list.innerHTML = "";
+  for(const [y, arr] of byYear){
+    const sec = document.createElement("section");
+    sec.className = "year"; sec.id = "y"+y;
+    sec.innerHTML = `<h2>${y}<small>${arr.length} ${arr.length===1?"colección":"colecciones"}</small></h2><div class="grid"></div>`;
+    const grid = sec.querySelector(".grid");
+    for(const s of arr) grid.appendChild(card(s));
+    list.appendChild(sec);
+  }
+}
+
+function card(s){
+  const a = document.createElement("a");
+  a.className = "set"; a.href = s.scryfall_uri; a.target = "_blank"; a.rel = "noopener";
+  const soon = s.released_at > today;
+  const d = new Date(s.released_at+"T00:00:00").toLocaleDateString("es-ES",{day:"numeric",month:"short"});
+  a.innerHTML = `<div class="art"><div class="sym"><img src="${s.icon_svg_uri}" alt=""></div><img class="cover" alt="" loading="lazy"></div>
+    <div class="meta"><h3>${esc(s.name)}</h3>
+    <div class="row"><span class="code">${esc(s.code)}</span><span>${d} · ${s.card_count} cartas</span></div>
+    <span class="tag ${soon?"soon":""}">${soon?"Próximamente":(TYPE_ES[s.set_type]||s.set_type)}</span></div>`;
+  a.dataset.code = s.code;
+  io.observe(a);
+  return a;
+}
+const esc = t => t.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* Carga del arte solo al entrar en pantalla, en cola (Scryfall pide ~10 peticiones/s como máximo) */
+const queue = []; let busy = false;
+const io = new IntersectionObserver(es => {
+  for(const e of es) if(e.isIntersecting){ io.unobserve(e.target); queue.push(e.target); }
+  pump();
+}, {rootMargin:"400px"});
+
+async function pump(){
+  if(busy) return; busy = true;
+  while(queue.length){
+    const el = queue.shift(), code = el.dataset.code;
+    let url = cache.get(code);
+    if(url === null){
+      try{
+        const r = await fetch(`https://api.scryfall.com/cards/search?q=${encodeURIComponent("e:"+code)}&order=rarity&dir=desc&unique=art`, {headers:{Accept:"application/json"}});
+        if(r.ok){
+          const j = await r.json(), c = j.data[0];
+          url = (c.image_uris || c.card_faces?.[0]?.image_uris || {}).art_crop || "";
+        } else url = "";
+      }catch(e){ url = ""; }
+      cache.set(code, url);
+      await new Promise(r => setTimeout(r, 110));
+    }
+    if(url){
+      const img = el.querySelector("img.cover");
+      img.onload = () => { img.classList.add("on"); el.querySelector(".sym").hidden = true; };
+      img.src = url;
+    }
+  }
+  busy = false;
+}
+
+let t; $("#q").addEventListener("input", () => { clearTimeout(t); t = setTimeout(render, 200); });
+$("#all").addEventListener("change", render);
+load();
+</script>
+</body>
+</html>
